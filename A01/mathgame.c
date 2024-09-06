@@ -15,11 +15,13 @@ int main() {
   printf("How many rounds do you want to play?\n");
   scanf("%d", &round);
 
-  for (i = 0; i<round; i++){
+  for (i = 0; i < round; i++){
+    
     num1 = rand() % 10;
     num2 = rand() % 10;
     printf("%d + %d = ?\n", num1, num2);
     scanf("%d", &sum);
+
     if (sum == (num1 + num2)){
       printf("Correct!\n");
       score += 1;
