@@ -1,3 +1,10 @@
+/*********************************
+ * memstats.c
+ * author: Ferida Mohammed
+ *
+ */
+
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -17,10 +24,43 @@ struct chunk {
 };
 
 void memstats(struct chunk* freelist, void* buffer[], int len) {
+    int free_blocks = 0;
+    int used_blocks = 0;
+    int free_mem = 0;
+    int used_mem = 0;
+    int really_used_mem = 0;
+
+    // Count free blocks and memory
+    struct chunk* current = freelist;
+    while (current != NULL) {
+        free_blocks++;
+        free_mem += current->size;
+        current = current->next;
+    }
+
+    // Count used blocks and memory
+    for (int i = 0; i < len; i++) {
+        if (buffer[i] != NULL) {
+            struct chunk* cnk = (struct chunk*)((char*)buffer[i] - sizeof(struct chunk));
+            used_blocks++;
+	    used_mem += cnk->size;
+            really_used_mem += cnk->used;
+        }
+    }
+
+    // Total blocks and memory
+    int total_blocks = free_blocks + used_blocks;
+    int total_memory = free_mem + used_mem;
+
+    // Calculate underutilized memory
+    double underutilized_mem = 1.0 - ((double)really_used_mem / used_mem);
+
+    printf("Total blocks: %d Free blocks: %d Used blocks: %d\n", total_blocks, free_blocks, used_blocks);
+    printf("Total memory allocated: %d Free memory: %d Used memory: %d\n", total_memory, free_mem, used_mem);
+    printf("Underutilized memory: %.2f\n", underutilized_mem);
 }
 
 int main ( int argc, char* argv[]) {
-
   printf("Starting test..\n");
 
   srand(100);
@@ -45,7 +85,7 @@ int main ( int argc, char* argv[]) {
       int index = rand() % BUFFER;
       if (buffer[index] != NULL) {
         free(buffer[index]);
-        buffer[index] = NULL;
+	buffer[index] = NULL;
         printf("Freeing index %d\n", index);
       } 
       else {
